@@ -1,14 +1,23 @@
 package server
 
-import "sort"
+import (
+	"dynamo/pkg/ring"
+	"dynamo/pkg/utils"
+	"encoding/json"
+	"fmt"
+	"net"
+	"strconv"
+)
+
+type ConsistentHashingRing = ring.ConsistentHashingRing
 
 type ServerConfig struct {
-	Id           int
-	virtualNodes int
-	port         int
-	hashKey      int
-	seedNode     bool
-	seedNodePort []string
+	Id            int
+	virtualNodes  int
+	port          int
+	hashKeys      []int // hashkeys of all VNs
+	seedNode      bool
+	seedNodesPort []int
 }
 
 type Server struct {
@@ -17,34 +26,38 @@ type Server struct {
 
 }
 
-func NewServerConfig(Id int, virtualNodes int, port int, hashKey int, seedNode bool, seedNodePort []string) *ServerConfig {
+func NewServerConfig(Id int, virtualNodes int, port int, seedNode bool, seedNodesPort []int) *ServerConfig {
+	// generate hashes for all the virtcual nodes
+	hashkeys := []int{}
+	for i := range virtualNodes {
+		//virtual node naming Convection
+		virtualNodeName := strconv.Itoa(Id) + "virtualNode" + strconv.Itoa(i)
+
+		vnHash := utils.GenerateNewRingHash(virtualNodeName)
+
+		hashkeys = append(hashkeys, int(vnHash))
+	}
+
 	return &ServerConfig{
-		Id:           Id,
-		virtualNodes: virtualNodes,
-		port:         port,
-		hashKey:      hashKey,
-		seedNode:     seedNode,
-		seedNodePort: seedNodePort,
+		Id:            Id,
+		virtualNodes:  virtualNodes,
+		port:          port,
+		hashKeys:      hashkeys,
+		seedNode:      seedNode,
+		seedNodesPort: seedNodesPort,
 	}
 }
 
-type ConsistentHashingRing struct {
-	members map[int]*Server // hashId, connection name
-	hashIds []int
-}
-
 func NewServer(config *ServerConfig) *Server {
+
 	// generate config
 	// generate server hash and its virtual nodes hash
-	var ring *ConsistentHashingRing
+	var chRing *ConsistentHashingRing
 
 	if config.seedNode == true {
 		// generate its own ring
 		// fill by gossip later
-		ring = &ConsistentHashingRing{
-			members: make(map[int]*Server),
-			hashIds: []int{config.hashKey},
-		}
+		chRing = ring.NewConsistentHashRing(make(map[int]int), []int{})
 
 	} else {
 		// fetch the ring from seed node
@@ -53,32 +66,56 @@ func NewServer(config *ServerConfig) *Server {
 
 	return &Server{
 		serverConfig:    config,
-		currentHashRing: ring,
+		currentHashRing: chRing,
 	}
 }
 
-func (s *Server) Run() {
+func (s *Server) Run() error {
+	// listening over tcp so these are client connections
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", s.serverConfig.port))
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Server Listening on port %d", s.serverConfig.port)
+
+	for {
+		conn, err := listener.Accept() // connection string with client
+		fmt.Println("test")
+		if err != nil {
+			return err
+		}
+
+		go s.serveConnection(conn) // conn already pass a light weight reference , pointer needed here
+
+	}
+	// graceful shutdown ?
 
 }
 
-func (r *ConsistentHashingRing) insertServer(hash int, s *Server) {
-	r.members[hash] = s
-	// go slices ussualy doesn't have point update operation, so append the rest at the end
+// Client - userId, keyId
+// Client - userId, keyId, valueId
 
-	idx := sort.Search(len(r.hashIds), func(i int) bool {
-		return r.hashIds[i] > hash
-	})
-
-	r.hashIds = append(r.hashIds[:idx], append([]int{hash}, r.hashIds[idx:]...)...)
+type Request struct {
+	Type  string
+	Key   string
+	Value string
 }
 
-// general function for clients
-func (r *ConsistentHashingRing) getNextServer(hash int) *Server {
-	// get the index of the next SERVER in the ring in log(N)
-	// sort.Search assumes array is already sorted
-	idx := sort.Search(len(r.hashIds), func(i int) bool {
-		return r.hashIds[i] > hash
-	})
+func (s *Server) serveConnection(conn net.Conn) {
+	// handling client get, put , routing the request to other servers
 
-	return r.members[r.hashIds[idx]] // returns that server
+	defer conn.Close()
+
+	var req Request
+
+	err := json.NewDecoder(conn).Decode(&req)
+	if err != nil {
+		fmt.Println("decode error:", err)
+		return
+	}
+
+	fmt.Println(req.Type, req.Key, req.Value)
+	fmt.Println(s.serverConfig.hashKeys)
 }
