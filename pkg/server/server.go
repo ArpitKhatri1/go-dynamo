@@ -15,27 +15,28 @@ type ServerConfig struct {
 	Id            int
 	virtualNodes  int
 	port          int
-	hashKeys      []int // hashkeys of all VNs
+	hashKeys      []uint64 // hashkeys of all VNs
 	seedNode      bool
 	seedNodesPort []int
 }
 
 type Server struct {
+	listerner       net.Listener
 	serverConfig    *ServerConfig
 	currentHashRing *ConsistentHashingRing // local
 
 }
 
 func NewServerConfig(Id int, virtualNodes int, port int, seedNode bool, seedNodesPort []int) *ServerConfig {
-	// generate hashes for all the virtcual nodes
-	hashkeys := []int{}
+	// generate hashes for all the virtual nodes
+	hashkeys := []uint64{}
 	for i := range virtualNodes {
 		//virtual node naming Convection
 		virtualNodeName := strconv.Itoa(Id) + "virtualNode" + strconv.Itoa(i)
 
 		vnHash := utils.GenerateNewRingHash(virtualNodeName)
 
-		hashkeys = append(hashkeys, int(vnHash))
+		hashkeys = append(hashkeys, vnHash)
 	}
 
 	return &ServerConfig{
@@ -78,7 +79,9 @@ func (s *Server) Run() error {
 		return err
 	}
 
-	fmt.Printf("Server Listening on port %d", s.serverConfig.port)
+	s.listerner = listener
+
+	fmt.Printf("Server Listening on port %d \n", s.serverConfig.port)
 
 	for {
 		conn, err := listener.Accept() // connection string with client
@@ -90,7 +93,6 @@ func (s *Server) Run() error {
 		go s.serveConnection(conn) // conn already pass a light weight reference , pointer needed here
 
 	}
-	// graceful shutdown ?
 
 }
 
@@ -104,7 +106,7 @@ type Request struct {
 }
 
 func (s *Server) serveConnection(conn net.Conn) {
-	// handling client get, put , routing the request to other servers
+	// handling client get, put or routing the request to other preference servers
 
 	defer conn.Close()
 

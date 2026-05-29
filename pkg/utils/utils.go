@@ -4,7 +4,7 @@ import (
 	"github.com/cespare/xxhash/v2"
 )
 
-func GenerateNewRingHash(name string) int {
+func GenerateNewRingHash(name string) uint64 {
 	hash := xxhash.Sum64([]byte(name))
-	return int(hash)
+	return uint64(hash)
 }
