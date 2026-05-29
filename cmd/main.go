@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	seedNodePorts = []int{8000}
+	seedNodePorts = []int{50051}
 )
 
 func main() {
@@ -19,11 +19,12 @@ func main() {
 	virtualNode := flag.Int("vn", 1, "Number of Virtual nodes of server")
 	seedNode := flag.Bool("seedNode", false, "seed Node or not")
 	serverId := flag.Int("serverId", 1, "serverId")
+	gRPCPort := flag.Int("gport", 50052, "RPC Port of the server")
 	flag.Parse()
 
 	// Configure and start the server
 
-	serverConfig := server.NewServerConfig(*serverId, *virtualNode, *port, *seedNode, seedNodePorts)
+	serverConfig := server.NewServerConfig(*serverId, *virtualNode, *port, *seedNode, *gRPCPort, seedNodePorts)
 
 	server := server.NewServer(serverConfig)
 

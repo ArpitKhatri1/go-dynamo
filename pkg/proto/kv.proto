@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+
+package dynamo;
+
+
+
+option go_package = "pkg/gen";
+
+// Initial discovery of seed node when sends its current members list
+// Replication service which instructs the replicas 
+// fetching preference list for a given partition_key
+// gossip protocol which sends current members list to other memebers
+// hinted handoff rpc call
+
+
+
+// The server struct must implement This service and its its Methods
+service NodeDiscoveryService { // calling to seeder node
+  rpc RegisterNode(Node) returns (NodeList);
+}
+
+message Node {
+    uint32 serverId = 1;
+  
+   repeated uint64 serverHash = 4;
+}
+
+
+message NodeList {
+    repeated Node nodes = 1;
+}
+
+
+
+
+

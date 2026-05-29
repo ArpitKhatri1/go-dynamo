@@ -6,18 +6,18 @@ import (
 )
 
 type ConsistentHashingRing struct {
-	members map[int]int // hashId, serverId
-	hashIds []int
+	members map[uint64]int // hashId, serverId
+	hashIds []uint64
 }
 
-func NewConsistentHashRing(members map[int]int, hashIds []int) *ConsistentHashingRing {
+func NewConsistentHashRing(members map[uint64]int, hashIds []uint64) *ConsistentHashingRing {
 	return &ConsistentHashingRing{
 		members: members,
 		hashIds: hashIds,
 	}
 }
 
-func (r *ConsistentHashingRing) insertServer(hash int, serverId int) {
+func (r *ConsistentHashingRing) InsertServer(hash uint64, serverId int) {
 	r.members[hash] = serverId
 	// go slices ussualy doesn't have point update operation, so append the rest at the end
 
@@ -25,11 +25,11 @@ func (r *ConsistentHashingRing) insertServer(hash int, serverId int) {
 		return r.hashIds[i] > hash
 	})
 
-	r.hashIds = append(r.hashIds[:idx], append([]int{hash}, r.hashIds[idx:]...)...)
+	r.hashIds = append(r.hashIds[:idx], append([]uint64{hash}, r.hashIds[idx:]...)...)
 }
 
 // general function for clients
-func (r *ConsistentHashingRing) getNextServerId(hash int) int {
+func (r *ConsistentHashingRing) GetNextServerId(hash uint64) int {
 	// get the index of the next SERVER in the ring in log(N)
 	// sort.Search assumes array is already sorted
 	idx := sort.Search(len(r.hashIds), func(i int) bool {
@@ -40,4 +40,8 @@ func (r *ConsistentHashingRing) getNextServerId(hash int) int {
 	}
 
 	return r.members[r.hashIds[idx]] // returns that server
+}
+
+func (r *ConsistentHashingRing) GetMembers() map[uint64]int {
+	return r.members
 }

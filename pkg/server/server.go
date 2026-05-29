@@ -1,12 +1,19 @@
 package server
 
 import (
+	"context"
+	pb "dynamo/pkg/gen"
 	"dynamo/pkg/ring"
 	"dynamo/pkg/utils"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net"
 	"strconv"
+	"sync"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type ConsistentHashingRing = ring.ConsistentHashingRing
@@ -18,16 +25,20 @@ type ServerConfig struct {
 	hashKeys      []uint64 // hashkeys of all VNs
 	seedNode      bool
 	seedNodesPort []int
+	grpcPort      int
 }
 
 type Server struct {
+	pb.UnimplementedNodeDiscoveryServiceServer
+
 	listerner       net.Listener
+	mu              sync.RWMutex
 	serverConfig    *ServerConfig
 	currentHashRing *ConsistentHashingRing // local
 
 }
 
-func NewServerConfig(Id int, virtualNodes int, port int, seedNode bool, seedNodesPort []int) *ServerConfig {
+func NewServerConfig(Id int, virtualNodes int, port int, seedNode bool, gRPCPort int, seedNodesPort []int) *ServerConfig {
 	// generate hashes for all the virtual nodes
 	hashkeys := []uint64{}
 	for i := range virtualNodes {
@@ -45,6 +56,7 @@ func NewServerConfig(Id int, virtualNodes int, port int, seedNode bool, seedNode
 		port:          port,
 		hashKeys:      hashkeys,
 		seedNode:      seedNode,
+		grpcPort:      gRPCPort,
 		seedNodesPort: seedNodesPort,
 	}
 }
@@ -58,10 +70,49 @@ func NewServer(config *ServerConfig) *Server {
 	if config.seedNode == true {
 		// generate its own ring
 		// fill by gossip later
-		chRing = ring.NewConsistentHashRing(make(map[int]int), []int{})
+
+		mpp := make(map[uint64]int)
+
+		for _, hash := range config.hashKeys {
+			mpp[hash] = config.Id
+		}
+
+		chRing = ring.NewConsistentHashRing(mpp, config.hashKeys)
 
 	} else {
-		// fetch the ring from seed node
+		// fetch the ring from seed node (act as grpc client)
+
+		node := &pb.Node{
+			ServerId: uint32(config.Id),
+
+			ServerHash: config.hashKeys,
+		}
+
+		// grpc call to seed node
+
+		//format => grpc.Dial(addr,encryption settings for connection)
+
+		conn, err := grpc.Dial(
+			fmt.Sprintf("localhost:%d", config.seedNodesPort[0]),
+			grpc.WithTransportCredentials(
+				insecure.NewCredentials(),
+			)) // not TLS
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		client := pb.NewNodeDiscoveryServiceClient(conn)
+
+		resp, err := client.RegisterNode(context.Background(), node)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println(resp.Nodes)
+
+		// add itself along with fetch results
 
 	}
 
@@ -73,6 +124,16 @@ func NewServer(config *ServerConfig) *Server {
 
 func (s *Server) Run() error {
 	// listening over tcp so these are client connections
+	go func() {
+		err := s.RunGRPCServer()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+	return s.RunTCPServer()
+}
+
+func (s *Server) RunTCPServer() error {
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", s.serverConfig.port))
 
 	if err != nil {
@@ -94,6 +155,79 @@ func (s *Server) Run() error {
 
 	}
 
+}
+
+func (s *Server) RunGRPCServer() error {
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", s.serverConfig.grpcPort))
+
+	if err != nil {
+		return err
+	}
+
+	grpcServer := grpc.NewServer()
+
+	// Register the generated proto services
+
+	pb.RegisterNodeDiscoveryServiceServer(
+		grpcServer, s,
+	)
+
+	fmt.Printf(
+		"gRPC Server Listening on %d\n",
+		s.serverConfig.grpcPort,
+	)
+
+	return grpcServer.Serve(listener)
+
+}
+
+// Implement the proto server grpc Methods, handling the call in the server
+
+func (s *Server) RegisterNode(
+	ctx context.Context,
+	node *pb.Node,
+) (*pb.NodeList, error) {
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	fmt.Println(
+		"Registering node:",
+		node.ServerId,
+	)
+
+	// insert into local ring
+	for _, hash := range node.ServerHash {
+		s.currentHashRing.InsertServer(
+			hash,
+			int(node.ServerId),
+		)
+	}
+
+	// group hashes by server id
+	nodesMap := make(map[int][]uint64)
+
+	for hash, serverID := range s.currentHashRing.GetMembers() {
+
+		nodesMap[serverID] = append(
+			nodesMap[serverID],
+			hash,
+		)
+	}
+
+	list := []*pb.Node{}
+
+	for serverID, hashes := range nodesMap {
+
+		list = append(list, &pb.Node{
+			ServerId:   uint32(serverID),
+			ServerHash: hashes,
+		})
+	}
+
+	return &pb.NodeList{
+		Nodes: list,
+	}, nil
 }
 
 // Client - userId, keyId
