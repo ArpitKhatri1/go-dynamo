@@ -5,7 +5,6 @@ import (
 	pb "dynamo/pkg/gen"
 	"dynamo/pkg/ring"
 	"dynamo/pkg/utils"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net"
@@ -13,10 +12,14 @@ import (
 	"sync"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 type ConsistentHashingRing = ring.ConsistentHashingRing
+
+type SeedNodePortType struct {
+	TCPPort  int
+	GRPCPort int
+}
 
 type ServerConfig struct {
 	Id            int
@@ -24,7 +27,7 @@ type ServerConfig struct {
 	port          int
 	hashKeys      []uint64 // hashkeys of all VNs
 	seedNode      bool
-	seedNodesPort []int
+	seedNodesPort []SeedNodePortType
 	grpcPort      int
 }
 
@@ -38,7 +41,7 @@ type Server struct {
 
 }
 
-func NewServerConfig(Id int, virtualNodes int, port int, seedNode bool, gRPCPort int, seedNodesPort []int) *ServerConfig {
+func NewServerConfig(Id int, virtualNodes int, port int, seedNode bool, gRPCPort int, seedNodesPort []SeedNodePortType) *ServerConfig {
 	// generate hashes for all the virtual nodes
 	hashkeys := []uint64{}
 	for i := range virtualNodes {
@@ -83,26 +86,11 @@ func NewServer(config *ServerConfig) *Server {
 		// fetch the ring from seed node (act as grpc client)
 
 		node := &pb.Node{
-			ServerId: uint32(config.Id),
-
+			ServerId:   uint32(config.Id),
 			ServerHash: config.hashKeys,
 		}
 
-		// grpc call to seed node
-
-		//format => grpc.Dial(addr,encryption settings for connection)
-
-		conn, err := grpc.Dial(
-			fmt.Sprintf("localhost:%d", config.seedNodesPort[0]),
-			grpc.WithTransportCredentials(
-				insecure.NewCredentials(),
-			)) // not TLS
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		client := pb.NewNodeDiscoveryServiceClient(conn)
+		client := NewNodeRegistrationClient(config)
 
 		resp, err := client.RegisterNode(context.Background(), node)
 
@@ -110,10 +98,21 @@ func NewServer(config *ServerConfig) *Server {
 			log.Fatal(err)
 		}
 
-		fmt.Println(resp.Nodes)
+		// add fetch to current clist
 
-		// add itself along with fetch results
+		nodes := resp.GetNodes()
 
+		mpp := make(map[uint64]int)
+		hashIds := []uint64{}
+
+		for _, currNode := range nodes {
+			for _, hash := range currNode.ServerHash {
+				mpp[hash] = int(currNode.ServerId)
+				hashIds = append(hashIds, hash)
+			}
+		}
+
+		chRing = ring.NewConsistentHashRing(mpp, hashIds)
 	}
 
 	return &Server{
@@ -182,76 +181,3 @@ func (s *Server) RunGRPCServer() error {
 }
 
 // Implement the proto server grpc Methods, handling the call in the server
-
-func (s *Server) RegisterNode(
-	ctx context.Context,
-	node *pb.Node,
-) (*pb.NodeList, error) {
-
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	fmt.Println(
-		"Registering node:",
-		node.ServerId,
-	)
-
-	// insert into local ring
-	for _, hash := range node.ServerHash {
-		s.currentHashRing.InsertServer(
-			hash,
-			int(node.ServerId),
-		)
-	}
-
-	// group hashes by server id
-	nodesMap := make(map[int][]uint64)
-
-	for hash, serverID := range s.currentHashRing.GetMembers() {
-
-		nodesMap[serverID] = append(
-			nodesMap[serverID],
-			hash,
-		)
-	}
-
-	list := []*pb.Node{}
-
-	for serverID, hashes := range nodesMap {
-
-		list = append(list, &pb.Node{
-			ServerId:   uint32(serverID),
-			ServerHash: hashes,
-		})
-	}
-
-	return &pb.NodeList{
-		Nodes: list,
-	}, nil
-}
-
-// Client - userId, keyId
-// Client - userId, keyId, valueId
-
-type Request struct {
-	Type  string
-	Key   string
-	Value string
-}
-
-func (s *Server) serveConnection(conn net.Conn) {
-	// handling client get, put or routing the request to other preference servers
-
-	defer conn.Close()
-
-	var req Request
-
-	err := json.NewDecoder(conn).Decode(&req)
-	if err != nil {
-		fmt.Println("decode error:", err)
-		return
-	}
-
-	fmt.Println(req.Type, req.Key, req.Value)
-	fmt.Println(s.serverConfig.hashKeys)
-}

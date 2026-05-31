@@ -10,7 +10,12 @@ import (
 )
 
 var (
-	seedNodePorts = []int{50051}
+	seedNodePorts = []server.SeedNodePortType{
+		{
+			TCPPort:  8080,
+			GRPCPort: 50051,
+		},
+	}
 )
 
 func main() {

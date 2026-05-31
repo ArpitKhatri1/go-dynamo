@@ -9,7 +9,7 @@ option go_package = "pkg/gen";
 
 // Initial discovery of seed node when sends its current members list
 // Replication service which instructs the replicas 
-// fetching preference list for a given partition_key
+// fetching preference list for a given partition_key ??grpc call 
 // gossip protocol which sends current members list to other memebers
 // hinted handoff rpc call
 
@@ -32,6 +32,12 @@ message NodeList {
 }
 
 
+
+
+
+service ReplicationService {
+  
+}
 
 
 

@@ -2,6 +2,7 @@
 package ring
 
 import (
+	"slices"
 	"sort"
 )
 
@@ -11,6 +12,7 @@ type ConsistentHashingRing struct {
 }
 
 func NewConsistentHashRing(members map[uint64]int, hashIds []uint64) *ConsistentHashingRing {
+	slices.Sort(hashIds)
 	return &ConsistentHashingRing{
 		members: members,
 		hashIds: hashIds,
@@ -44,4 +46,8 @@ func (r *ConsistentHashingRing) GetNextServerId(hash uint64) int {
 
 func (r *ConsistentHashingRing) GetMembers() map[uint64]int {
 	return r.members
+}
+
+func (r *ConsistentHashingRing) GetKeyPreferenceList(partitionKey uint64) []uint64 {
+
 }
