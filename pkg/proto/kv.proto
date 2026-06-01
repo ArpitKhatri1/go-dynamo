@@ -21,18 +21,13 @@ service NodeDiscoveryService { // calling to seeder node
 }
 
 message Node {
-    uint32 serverId = 1;
-  
-   repeated uint64 serverHash = 4;
+  uint32 server_id = 1;
+  repeated uint64 server_hashes = 2;
 }
-
 
 message NodeList {
-    repeated Node nodes = 1;
+  repeated Node nodes = 1;
 }
-
-
-
 
 
 service ReplicationService {

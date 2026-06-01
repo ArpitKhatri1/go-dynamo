@@ -40,7 +40,7 @@ func (s *Server) RegisterNode(
 	)
 
 	// insert into local ring
-	for _, hash := range node.ServerHash {
+	for _, hash := range node.ServerHashes {
 		s.currentHashRing.InsertServer(
 			hash,
 			int(node.ServerId),
@@ -63,8 +63,8 @@ func (s *Server) RegisterNode(
 	for serverID, hashes := range nodesMap {
 
 		list = append(list, &pb.Node{
-			ServerId:   uint32(serverID),
-			ServerHash: hashes,
+			ServerId:     uint32(serverID),
+			ServerHashes: hashes,
 		})
 	}
 	fmt.Println(list)

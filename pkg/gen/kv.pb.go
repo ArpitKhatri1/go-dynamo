@@ -23,8 +23,8 @@ const (
 
 type Node struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ServerId      uint32                 `protobuf:"varint,1,opt,name=serverId,proto3" json:"serverId,omitempty"`
-	ServerHash    []uint64               `protobuf:"varint,4,rep,packed,name=serverHash,proto3" json:"serverHash,omitempty"`
+	ServerId      uint32                 `protobuf:"varint,1,opt,name=server_id,json=serverId,proto3" json:"server_id,omitempty"`
+	ServerHashes  []uint64               `protobuf:"varint,2,rep,packed,name=server_hashes,json=serverHashes,proto3" json:"server_hashes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -66,9 +66,9 @@ func (x *Node) GetServerId() uint32 {
 	return 0
 }
 
-func (x *Node) GetServerHash() []uint64 {
+func (x *Node) GetServerHashes() []uint64 {
 	if x != nil {
-		return x.ServerHash
+		return x.ServerHashes
 	}
 	return nil
 }
@@ -121,16 +121,15 @@ var File_pkg_proto_kv_proto protoreflect.FileDescriptor
 
 const file_pkg_proto_kv_proto_rawDesc = "" +
 	"\n" +
-	"\x12pkg/proto/kv.proto\x12\x06dynamo\"B\n" +
-	"\x04Node\x12\x1a\n" +
-	"\bserverId\x18\x01 \x01(\rR\bserverId\x12\x1e\n" +
-	"\n" +
-	"serverHash\x18\x04 \x03(\x04R\n" +
-	"serverHash\".\n" +
+	"\x12pkg/proto/kv.proto\x12\x06dynamo\"H\n" +
+	"\x04Node\x12\x1b\n" +
+	"\tserver_id\x18\x01 \x01(\rR\bserverId\x12#\n" +
+	"\rserver_hashes\x18\x02 \x03(\x04R\fserverHashes\".\n" +
 	"\bNodeList\x12\"\n" +
 	"\x05nodes\x18\x01 \x03(\v2\f.dynamo.NodeR\x05nodes2F\n" +
 	"\x14NodeDiscoveryService\x12.\n" +
-	"\fRegisterNode\x12\f.dynamo.Node\x1a\x10.dynamo.NodeListB\tZ\apkg/genb\x06proto3"
+	"\fRegisterNode\x12\f.dynamo.Node\x1a\x10.dynamo.NodeList2\x14\n" +
+	"\x12ReplicationServiceB\tZ\apkg/genb\x06proto3"
 
 var (
 	file_pkg_proto_kv_proto_rawDescOnce sync.Once
@@ -173,7 +172,7 @@ func file_pkg_proto_kv_proto_init() {
 			NumEnums:      0,
 			NumMessages:   2,
 			NumExtensions: 0,
-			NumServices:   1,
+			NumServices:   2,
 		},
 		GoTypes:           file_pkg_proto_kv_proto_goTypes,
 		DependencyIndexes: file_pkg_proto_kv_proto_depIdxs,

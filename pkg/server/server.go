@@ -34,11 +34,13 @@ type ServerConfig struct {
 type Server struct {
 	pb.UnimplementedNodeDiscoveryServiceServer
 
-	listerner       net.Listener
-	mu              sync.RWMutex
-	serverConfig    *ServerConfig
+	listerner    net.Listener
+	mu           sync.Mutex
+	serverConfig *ServerConfig
+
 	currentHashRing *ConsistentHashingRing // local
 
+	serverMembership *Membership
 }
 
 func NewServerConfig(Id int, virtualNodes int, port int, seedNode bool, gRPCPort int, seedNodesPort []SeedNodePortType) *ServerConfig {
@@ -86,8 +88,8 @@ func NewServer(config *ServerConfig) *Server {
 		// fetch the ring from seed node (act as grpc client)
 
 		node := &pb.Node{
-			ServerId:   uint32(config.Id),
-			ServerHash: config.hashKeys,
+			ServerId:     uint32(config.Id),
+			ServerHashes: config.hashKeys,
 		}
 
 		client := NewNodeRegistrationClient(config)
@@ -106,7 +108,7 @@ func NewServer(config *ServerConfig) *Server {
 		hashIds := []uint64{}
 
 		for _, currNode := range nodes {
-			for _, hash := range currNode.ServerHash {
+			for _, hash := range currNode.ServerHashes {
 				mpp[hash] = int(currNode.ServerId)
 				hashIds = append(hashIds, hash)
 			}

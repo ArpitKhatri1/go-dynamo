@@ -1,12 +1,12 @@
 package config
 
 type GlobalConfig struct {
-	ReplicationFactorN uint32
-	ReadAcknowledgeR   uint32
-	WriteAcknowledgeW  uint32
+	ReplicationFactorN int
+	ReadAcknowledgeR   int
+	WriteAcknowledgeW  int
 }
 
-var appConfig = &GlobalConfig{ // R+W > N
+var appConfig = &GlobalConfig{ // R+W > N for quorum
 	ReplicationFactorN: 3,
 	ReadAcknowledgeR:   2,
 	WriteAcknowledgeW:  2,

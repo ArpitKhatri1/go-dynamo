@@ -2,6 +2,7 @@
 package ring
 
 import (
+	"dynamo/pkg/config"
 	"slices"
 	"sort"
 )
@@ -37,6 +38,7 @@ func (r *ConsistentHashingRing) GetNextServerId(hash uint64) int {
 	idx := sort.Search(len(r.hashIds), func(i int) bool {
 		return r.hashIds[i] > hash
 	})
+
 	if idx == len(r.hashIds) {
 		idx = 0
 	}
@@ -48,6 +50,21 @@ func (r *ConsistentHashingRing) GetMembers() map[uint64]int {
 	return r.members
 }
 
-func (r *ConsistentHashingRing) GetKeyPreferenceList(partitionKey uint64) []uint64 {
+// Get top N in preference list which are all from different servers.
+func (r *ConsistentHashingRing) GetPreferenceListForKey(partitionKey uint64) []int {
+	extraNodes := 2
+	globalConfig := config.GetSystemConfig()
+	preferenceList := []int{r.GetNextServerId(partitionKey)}
+	replicationFactor := globalConfig.ReplicationFactorN
+	count := 1
+	for (len(preferenceList)) < replicationFactor+extraNodes {
+		nextserverId := r.GetNextServerId(uint64(preferenceList[count-1]))
+		if nextserverId != preferenceList[0] {
+			preferenceList = append(preferenceList, nextserverId)
+		} else {
+			break
+		}
+	}
 
+	return preferenceList
 }
