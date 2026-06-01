@@ -124,10 +124,19 @@ var NodeDiscoveryService_ServiceDesc = grpc.ServiceDesc{
 	Metadata: "pkg/proto/kv.proto",
 }
 
+const (
+	ReplicationService_TransferWrite_FullMethodName        = "/dynamo.ReplicationService/TransferWrite"
+	ReplicationService_ReplicateWrite_FullMethodName       = "/dynamo.ReplicationService/ReplicateWrite"
+	ReplicationService_TransferHandoffWrite_FullMethodName = "/dynamo.ReplicationService/TransferHandoffWrite"
+)
+
 // ReplicationServiceClient is the client API for ReplicationService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ReplicationServiceClient interface {
+	TransferWrite(ctx context.Context, in *PutMessage, opts ...grpc.CallOption) (*Ack, error)
+	ReplicateWrite(ctx context.Context, in *PutMessage, opts ...grpc.CallOption) (*Ack, error)
+	TransferHandoffWrite(ctx context.Context, in *HandOffData, opts ...grpc.CallOption) (*Ack, error)
 }
 
 type replicationServiceClient struct {
@@ -138,10 +147,43 @@ func NewReplicationServiceClient(cc grpc.ClientConnInterface) ReplicationService
 	return &replicationServiceClient{cc}
 }
 
+func (c *replicationServiceClient) TransferWrite(ctx context.Context, in *PutMessage, opts ...grpc.CallOption) (*Ack, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Ack)
+	err := c.cc.Invoke(ctx, ReplicationService_TransferWrite_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *replicationServiceClient) ReplicateWrite(ctx context.Context, in *PutMessage, opts ...grpc.CallOption) (*Ack, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Ack)
+	err := c.cc.Invoke(ctx, ReplicationService_ReplicateWrite_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *replicationServiceClient) TransferHandoffWrite(ctx context.Context, in *HandOffData, opts ...grpc.CallOption) (*Ack, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Ack)
+	err := c.cc.Invoke(ctx, ReplicationService_TransferHandoffWrite_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ReplicationServiceServer is the server API for ReplicationService service.
 // All implementations must embed UnimplementedReplicationServiceServer
 // for forward compatibility.
 type ReplicationServiceServer interface {
+	TransferWrite(context.Context, *PutMessage) (*Ack, error)
+	ReplicateWrite(context.Context, *PutMessage) (*Ack, error)
+	TransferHandoffWrite(context.Context, *HandOffData) (*Ack, error)
 	mustEmbedUnimplementedReplicationServiceServer()
 }
 
@@ -152,6 +194,15 @@ type ReplicationServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedReplicationServiceServer struct{}
 
+func (UnimplementedReplicationServiceServer) TransferWrite(context.Context, *PutMessage) (*Ack, error) {
+	return nil, status.Error(codes.Unimplemented, "method TransferWrite not implemented")
+}
+func (UnimplementedReplicationServiceServer) ReplicateWrite(context.Context, *PutMessage) (*Ack, error) {
+	return nil, status.Error(codes.Unimplemented, "method ReplicateWrite not implemented")
+}
+func (UnimplementedReplicationServiceServer) TransferHandoffWrite(context.Context, *HandOffData) (*Ack, error) {
+	return nil, status.Error(codes.Unimplemented, "method TransferHandoffWrite not implemented")
+}
 func (UnimplementedReplicationServiceServer) mustEmbedUnimplementedReplicationServiceServer() {}
 func (UnimplementedReplicationServiceServer) testEmbeddedByValue()                            {}
 
@@ -173,13 +224,182 @@ func RegisterReplicationServiceServer(s grpc.ServiceRegistrar, srv ReplicationSe
 	s.RegisterService(&ReplicationService_ServiceDesc, srv)
 }
 
+func _ReplicationService_TransferWrite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PutMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReplicationServiceServer).TransferWrite(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ReplicationService_TransferWrite_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReplicationServiceServer).TransferWrite(ctx, req.(*PutMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ReplicationService_ReplicateWrite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PutMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReplicationServiceServer).ReplicateWrite(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ReplicationService_ReplicateWrite_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReplicationServiceServer).ReplicateWrite(ctx, req.(*PutMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ReplicationService_TransferHandoffWrite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HandOffData)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReplicationServiceServer).TransferHandoffWrite(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ReplicationService_TransferHandoffWrite_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReplicationServiceServer).TransferHandoffWrite(ctx, req.(*HandOffData))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ReplicationService_ServiceDesc is the grpc.ServiceDesc for ReplicationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ReplicationService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "dynamo.ReplicationService",
 	HandlerType: (*ReplicationServiceServer)(nil),
-	Methods:     []grpc.MethodDesc{},
-	Streams:     []grpc.StreamDesc{},
-	Metadata:    "pkg/proto/kv.proto",
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "TransferWrite",
+			Handler:    _ReplicationService_TransferWrite_Handler,
+		},
+		{
+			MethodName: "ReplicateWrite",
+			Handler:    _ReplicationService_ReplicateWrite_Handler,
+		},
+		{
+			MethodName: "TransferHandoffWrite",
+			Handler:    _ReplicationService_TransferHandoffWrite_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "pkg/proto/kv.proto",
+}
+
+const (
+	GossipService_Gossip_FullMethodName = "/dynamo.GossipService/Gossip"
+)
+
+// GossipServiceClient is the client API for GossipService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type GossipServiceClient interface {
+	Gossip(ctx context.Context, in *GossipMessage, opts ...grpc.CallOption) (*Ack, error)
+}
+
+type gossipServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewGossipServiceClient(cc grpc.ClientConnInterface) GossipServiceClient {
+	return &gossipServiceClient{cc}
+}
+
+func (c *gossipServiceClient) Gossip(ctx context.Context, in *GossipMessage, opts ...grpc.CallOption) (*Ack, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Ack)
+	err := c.cc.Invoke(ctx, GossipService_Gossip_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// GossipServiceServer is the server API for GossipService service.
+// All implementations must embed UnimplementedGossipServiceServer
+// for forward compatibility.
+type GossipServiceServer interface {
+	Gossip(context.Context, *GossipMessage) (*Ack, error)
+	mustEmbedUnimplementedGossipServiceServer()
+}
+
+// UnimplementedGossipServiceServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedGossipServiceServer struct{}
+
+func (UnimplementedGossipServiceServer) Gossip(context.Context, *GossipMessage) (*Ack, error) {
+	return nil, status.Error(codes.Unimplemented, "method Gossip not implemented")
+}
+func (UnimplementedGossipServiceServer) mustEmbedUnimplementedGossipServiceServer() {}
+func (UnimplementedGossipServiceServer) testEmbeddedByValue()                       {}
+
+// UnsafeGossipServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to GossipServiceServer will
+// result in compilation errors.
+type UnsafeGossipServiceServer interface {
+	mustEmbedUnimplementedGossipServiceServer()
+}
+
+func RegisterGossipServiceServer(s grpc.ServiceRegistrar, srv GossipServiceServer) {
+	// If the following call panics, it indicates UnimplementedGossipServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&GossipService_ServiceDesc, srv)
+}
+
+func _GossipService_Gossip_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GossipMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GossipServiceServer).Gossip(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GossipService_Gossip_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GossipServiceServer).Gossip(ctx, req.(*GossipMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// GossipService_ServiceDesc is the grpc.ServiceDesc for GossipService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var GossipService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "dynamo.GossipService",
+	HandlerType: (*GossipServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Gossip",
+			Handler:    _GossipService_Gossip_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "pkg/proto/kv.proto",
 }

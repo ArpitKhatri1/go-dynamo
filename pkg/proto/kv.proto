@@ -1,19 +1,10 @@
 syntax = "proto3";
 
-
 package dynamo;
-
-
 
 option go_package = "pkg/gen";
 
-// Initial discovery of seed node when sends its current members list
-// Replication service which instructs the replicas 
-// fetching preference list for a given partition_key ??grpc call 
-// gossip protocol which sends current members list to other memebers
-// hinted handoff rpc call
-
-
+//--------------------------------------------------------------
 
 // The server struct must implement This service and its its Methods
 service NodeDiscoveryService { // calling to seeder node
@@ -21,7 +12,7 @@ service NodeDiscoveryService { // calling to seeder node
 }
 
 message Node {
-  uint32 server_id = 1;
+  uint32          server_id     = 1;
   repeated uint64 server_hashes = 2;
 }
 
@@ -30,9 +21,66 @@ message NodeList {
 }
 
 
-service ReplicationService {
-  
+// --------------------REPLICATION-----------------------
+
+service ReplicationService { // 
+  rpc TransferWrite(PutMessage) returns (Ack);
+  rpc ReplicateWrite(PutMessage) returns (Ack);
+  rpc TransferHandoffWrite(HandOffData) returns (Ack);
 }
+
+message Ack{
+  bool   success   = 1;
+  string message   = 2; // optional message string
+  int64  server_id = 3; // serverId sending the ACK
+}
+
+message HandOffData {
+  int64      server_id = 1;
+  PutMessage kv        = 2;
+}
+
+message PutMessage {
+  int64 key   = 1;
+  int64 value = 2;
+}
+
+message GetMessage {
+  int64 key = 1;
+}
+
+
+// -------------------------GOSSIP---------------------------
+
+service GossipService {
+  rpc Gossip(GossipMessage) returns (Ack);
+}
+
+message GossipMessage{
+  map<int64,ServerStateMessage> server_state = 1;
+}
+
+message ServerStateMessage {
+  int64 server_id = 1;
+  HeartBeatMessage heartbeat = 2;
+  int64 server_state = 3;
+}
+
+
+message HeartBeatMessage{
+  int64 heartbeat_number = 1;
+  string timestamp = 2; // actual go stores the time in time.Time
+
+}
+
+
+
+
+
+
+
+
+
 
 
 

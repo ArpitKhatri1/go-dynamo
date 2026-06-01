@@ -33,6 +33,8 @@ type ServerConfig struct {
 
 type Server struct {
 	pb.UnimplementedNodeDiscoveryServiceServer
+	pb.UnimplementedGossipServiceServer
+	pb.UnimplementedReplicationServiceServer
 
 	listerner    net.Listener
 	mu           sync.Mutex
@@ -170,6 +172,12 @@ func (s *Server) RunGRPCServer() error {
 	// Register the generated proto services
 
 	pb.RegisterNodeDiscoveryServiceServer(
+		grpcServer, s,
+	)
+	pb.RegisterReplicationServiceServer(
+		grpcServer, s,
+	)
+	pb.RegisterGossipServiceServer(
 		grpcServer, s,
 	)
 
