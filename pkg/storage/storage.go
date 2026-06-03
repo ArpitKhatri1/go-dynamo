@@ -52,11 +52,11 @@ func (s *Storage) PutKey(key int, value int) StorageItem {
 
 }
 
-func (s *Storage) GetKey(key int) StorageItem {
+func (s *Storage) GetKey(key int) int {
 	s.storeLock.RLock()
 	defer s.storeLock.Unlock()
 
-	return s.storageMap[key]
+	return s.storageMap[key].value
 }
 
 func (s *Storage) AddHandoffItem(intendendServer int, key int, value int) HandoffItem {

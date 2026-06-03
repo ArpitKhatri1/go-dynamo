@@ -11,8 +11,8 @@ import (
 
 type Request struct {
 	Type  string
-	Key   string
-	Value string
+	Key   int
+	Value int
 }
 
 func (s *Server) serveConnection(conn net.Conn) {
@@ -28,6 +28,9 @@ func (s *Server) serveConnection(conn net.Conn) {
 		return
 	}
 
-	fmt.Println(req.Type, req.Key, req.Value)
-	fmt.Println(s.serverConfig.hashKeys)
+	if req.Value == 0 {
+		fmt.Println(" null value")
+	}
+	s.handleInitialRequest(req)
+
 }

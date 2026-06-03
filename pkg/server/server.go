@@ -4,6 +4,7 @@ import (
 	"context"
 	pb "dynamo/pkg/gen"
 	"dynamo/pkg/ring"
+	"dynamo/pkg/storage"
 	"dynamo/pkg/utils"
 	"fmt"
 	"log"
@@ -40,9 +41,9 @@ type Server struct {
 	mu           sync.Mutex
 	serverConfig *ServerConfig
 
-	currentHashRing *ConsistentHashingRing // local
-
+	currentHashRing  *ConsistentHashingRing // local
 	serverMembership *Membership
+	serverStorage    *storage.Storage
 }
 
 func NewServerConfig(Id int, virtualNodes int, port int, seedNode bool, gRPCPort int, seedNodesPort []SeedNodePortType) *ServerConfig {

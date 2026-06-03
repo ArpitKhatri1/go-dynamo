@@ -25,7 +25,7 @@ message NodeList {
 
 service ReplicationService { // 
   rpc TransferWrite(PutMessage) returns (Ack);
-  rpc ReplicateWrite(PutMessage) returns (Ack);
+  rpc GetReadResponse(GetMessage) returns (ReadAck);
   rpc TransferHandoffWrite(HandOffData) returns (Ack);
 }
 
@@ -49,6 +49,9 @@ message GetMessage {
   int64 key = 1;
 }
 
+message ReadAck {
+  int64 value = 1;
+}
 
 // -------------------------GOSSIP---------------------------
 

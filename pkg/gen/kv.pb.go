@@ -325,6 +325,50 @@ func (x *GetMessage) GetKey() int64 {
 	return 0
 }
 
+type ReadAck struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Value         int64                  `protobuf:"varint,1,opt,name=value,proto3" json:"value,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReadAck) Reset() {
+	*x = ReadAck{}
+	mi := &file_pkg_proto_kv_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReadAck) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReadAck) ProtoMessage() {}
+
+func (x *ReadAck) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_kv_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReadAck.ProtoReflect.Descriptor instead.
+func (*ReadAck) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ReadAck) GetValue() int64 {
+	if x != nil {
+		return x.Value
+	}
+	return 0
+}
+
 type GossipMessage struct {
 	state         protoimpl.MessageState        `protogen:"open.v1"`
 	ServerState   map[int64]*ServerStateMessage `protobuf:"bytes,1,rep,name=server_state,json=serverState,proto3" json:"server_state,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
@@ -334,7 +378,7 @@ type GossipMessage struct {
 
 func (x *GossipMessage) Reset() {
 	*x = GossipMessage{}
-	mi := &file_pkg_proto_kv_proto_msgTypes[6]
+	mi := &file_pkg_proto_kv_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -346,7 +390,7 @@ func (x *GossipMessage) String() string {
 func (*GossipMessage) ProtoMessage() {}
 
 func (x *GossipMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_kv_proto_msgTypes[6]
+	mi := &file_pkg_proto_kv_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -359,7 +403,7 @@ func (x *GossipMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GossipMessage.ProtoReflect.Descriptor instead.
 func (*GossipMessage) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{6}
+	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GossipMessage) GetServerState() map[int64]*ServerStateMessage {
@@ -380,7 +424,7 @@ type ServerStateMessage struct {
 
 func (x *ServerStateMessage) Reset() {
 	*x = ServerStateMessage{}
-	mi := &file_pkg_proto_kv_proto_msgTypes[7]
+	mi := &file_pkg_proto_kv_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -392,7 +436,7 @@ func (x *ServerStateMessage) String() string {
 func (*ServerStateMessage) ProtoMessage() {}
 
 func (x *ServerStateMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_kv_proto_msgTypes[7]
+	mi := &file_pkg_proto_kv_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -405,7 +449,7 @@ func (x *ServerStateMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServerStateMessage.ProtoReflect.Descriptor instead.
 func (*ServerStateMessage) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{7}
+	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ServerStateMessage) GetServerId() int64 {
@@ -439,7 +483,7 @@ type HeartBeatMessage struct {
 
 func (x *HeartBeatMessage) Reset() {
 	*x = HeartBeatMessage{}
-	mi := &file_pkg_proto_kv_proto_msgTypes[8]
+	mi := &file_pkg_proto_kv_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -451,7 +495,7 @@ func (x *HeartBeatMessage) String() string {
 func (*HeartBeatMessage) ProtoMessage() {}
 
 func (x *HeartBeatMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_kv_proto_msgTypes[8]
+	mi := &file_pkg_proto_kv_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -464,7 +508,7 @@ func (x *HeartBeatMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HeartBeatMessage.ProtoReflect.Descriptor instead.
 func (*HeartBeatMessage) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{8}
+	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *HeartBeatMessage) GetHeartbeatNumber() int64 {
@@ -504,7 +548,9 @@ const file_pkg_proto_kv_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\x03R\x05value\"\x1e\n" +
 	"\n" +
 	"GetMessage\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\x03R\x03key\"\xb6\x01\n" +
+	"\x03key\x18\x01 \x01(\x03R\x03key\"\x1f\n" +
+	"\aReadAck\x12\x14\n" +
+	"\x05value\x18\x01 \x01(\x03R\x05value\"\xb6\x01\n" +
 	"\rGossipMessage\x12I\n" +
 	"\fserver_state\x18\x01 \x03(\v2&.dynamo.GossipMessage.ServerStateEntryR\vserverState\x1aZ\n" +
 	"\x10ServerStateEntry\x12\x10\n" +
@@ -518,10 +564,10 @@ const file_pkg_proto_kv_proto_rawDesc = "" +
 	"\x10heartbeat_number\x18\x01 \x01(\x03R\x0fheartbeatNumber\x12\x1c\n" +
 	"\ttimestamp\x18\x02 \x01(\tR\ttimestamp2F\n" +
 	"\x14NodeDiscoveryService\x12.\n" +
-	"\fRegisterNode\x12\f.dynamo.Node\x1a\x10.dynamo.NodeList2\xb3\x01\n" +
+	"\fRegisterNode\x12\f.dynamo.Node\x1a\x10.dynamo.NodeList2\xb8\x01\n" +
 	"\x12ReplicationService\x120\n" +
-	"\rTransferWrite\x12\x12.dynamo.PutMessage\x1a\v.dynamo.Ack\x121\n" +
-	"\x0eReplicateWrite\x12\x12.dynamo.PutMessage\x1a\v.dynamo.Ack\x128\n" +
+	"\rTransferWrite\x12\x12.dynamo.PutMessage\x1a\v.dynamo.Ack\x126\n" +
+	"\x0fGetReadResponse\x12\x12.dynamo.GetMessage\x1a\x0f.dynamo.ReadAck\x128\n" +
 	"\x14TransferHandoffWrite\x12\x13.dynamo.HandOffData\x1a\v.dynamo.Ack2=\n" +
 	"\rGossipService\x12,\n" +
 	"\x06Gossip\x12\x15.dynamo.GossipMessage\x1a\v.dynamo.AckB\tZ\apkg/genb\x06proto3"
@@ -538,7 +584,7 @@ func file_pkg_proto_kv_proto_rawDescGZIP() []byte {
 	return file_pkg_proto_kv_proto_rawDescData
 }
 
-var file_pkg_proto_kv_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_pkg_proto_kv_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_pkg_proto_kv_proto_goTypes = []any{
 	(*Node)(nil),               // 0: dynamo.Node
 	(*NodeList)(nil),           // 1: dynamo.NodeList
@@ -546,25 +592,26 @@ var file_pkg_proto_kv_proto_goTypes = []any{
 	(*HandOffData)(nil),        // 3: dynamo.HandOffData
 	(*PutMessage)(nil),         // 4: dynamo.PutMessage
 	(*GetMessage)(nil),         // 5: dynamo.GetMessage
-	(*GossipMessage)(nil),      // 6: dynamo.GossipMessage
-	(*ServerStateMessage)(nil), // 7: dynamo.ServerStateMessage
-	(*HeartBeatMessage)(nil),   // 8: dynamo.HeartBeatMessage
-	nil,                        // 9: dynamo.GossipMessage.ServerStateEntry
+	(*ReadAck)(nil),            // 6: dynamo.ReadAck
+	(*GossipMessage)(nil),      // 7: dynamo.GossipMessage
+	(*ServerStateMessage)(nil), // 8: dynamo.ServerStateMessage
+	(*HeartBeatMessage)(nil),   // 9: dynamo.HeartBeatMessage
+	nil,                        // 10: dynamo.GossipMessage.ServerStateEntry
 }
 var file_pkg_proto_kv_proto_depIdxs = []int32{
 	0,  // 0: dynamo.NodeList.nodes:type_name -> dynamo.Node
 	4,  // 1: dynamo.HandOffData.kv:type_name -> dynamo.PutMessage
-	9,  // 2: dynamo.GossipMessage.server_state:type_name -> dynamo.GossipMessage.ServerStateEntry
-	8,  // 3: dynamo.ServerStateMessage.heartbeat:type_name -> dynamo.HeartBeatMessage
-	7,  // 4: dynamo.GossipMessage.ServerStateEntry.value:type_name -> dynamo.ServerStateMessage
+	10, // 2: dynamo.GossipMessage.server_state:type_name -> dynamo.GossipMessage.ServerStateEntry
+	9,  // 3: dynamo.ServerStateMessage.heartbeat:type_name -> dynamo.HeartBeatMessage
+	8,  // 4: dynamo.GossipMessage.ServerStateEntry.value:type_name -> dynamo.ServerStateMessage
 	0,  // 5: dynamo.NodeDiscoveryService.RegisterNode:input_type -> dynamo.Node
 	4,  // 6: dynamo.ReplicationService.TransferWrite:input_type -> dynamo.PutMessage
-	4,  // 7: dynamo.ReplicationService.ReplicateWrite:input_type -> dynamo.PutMessage
+	5,  // 7: dynamo.ReplicationService.GetReadResponse:input_type -> dynamo.GetMessage
 	3,  // 8: dynamo.ReplicationService.TransferHandoffWrite:input_type -> dynamo.HandOffData
-	6,  // 9: dynamo.GossipService.Gossip:input_type -> dynamo.GossipMessage
+	7,  // 9: dynamo.GossipService.Gossip:input_type -> dynamo.GossipMessage
 	1,  // 10: dynamo.NodeDiscoveryService.RegisterNode:output_type -> dynamo.NodeList
 	2,  // 11: dynamo.ReplicationService.TransferWrite:output_type -> dynamo.Ack
-	2,  // 12: dynamo.ReplicationService.ReplicateWrite:output_type -> dynamo.Ack
+	6,  // 12: dynamo.ReplicationService.GetReadResponse:output_type -> dynamo.ReadAck
 	2,  // 13: dynamo.ReplicationService.TransferHandoffWrite:output_type -> dynamo.Ack
 	2,  // 14: dynamo.GossipService.Gossip:output_type -> dynamo.Ack
 	10, // [10:15] is the sub-list for method output_type
@@ -585,7 +632,7 @@ func file_pkg_proto_kv_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_proto_kv_proto_rawDesc), len(file_pkg_proto_kv_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   3,
 		},

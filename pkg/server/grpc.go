@@ -13,7 +13,7 @@ import (
 // NODE REGISTRATION
 func NewNodeRegistrationClient(config *ServerConfig) pb.NodeDiscoveryServiceClient {
 	conn, err := grpc.NewClient(
-		fmt.Sprintf("localhost:%d", config.seedNodesPort[0].GRPCPort),
+		fmt.Sprintf("localhost:%d", config.seedNodesPort[0].GRPCPort), //grpc port of server we are connecting to
 		grpc.WithTransportCredentials(
 			insecure.NewCredentials(),
 		)) // not TLS
@@ -23,6 +23,36 @@ func NewNodeRegistrationClient(config *ServerConfig) pb.NodeDiscoveryServiceClie
 	}
 
 	client := pb.NewNodeDiscoveryServiceClient(conn)
+	return client
+}
+
+func NewReplicationServiceClient(grpcPort int) pb.ReplicationServiceClient {
+	conn, err := grpc.NewClient(
+		fmt.Sprintf("localhost:%d", grpcPort), //grpc port of server we are connecting to
+		grpc.WithTransportCredentials(
+			insecure.NewCredentials(),
+		)) // not TLS
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	client := pb.NewReplicationServiceClient(conn)
+	return client
+}
+
+func NewGossipServiceClient(grpcPort int) pb.GossipServiceClient {
+	conn, err := grpc.NewClient(
+		fmt.Sprintf("localhost:%d", grpcPort), //grpc port of server we are connecting to
+		grpc.WithTransportCredentials(
+			insecure.NewCredentials(),
+		)) // not TLS
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	client := pb.NewGossipServiceClient(conn)
 	return client
 }
 

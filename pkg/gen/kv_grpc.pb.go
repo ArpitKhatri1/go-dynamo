@@ -126,7 +126,7 @@ var NodeDiscoveryService_ServiceDesc = grpc.ServiceDesc{
 
 const (
 	ReplicationService_TransferWrite_FullMethodName        = "/dynamo.ReplicationService/TransferWrite"
-	ReplicationService_ReplicateWrite_FullMethodName       = "/dynamo.ReplicationService/ReplicateWrite"
+	ReplicationService_GetReadResponse_FullMethodName      = "/dynamo.ReplicationService/GetReadResponse"
 	ReplicationService_TransferHandoffWrite_FullMethodName = "/dynamo.ReplicationService/TransferHandoffWrite"
 )
 
@@ -135,7 +135,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ReplicationServiceClient interface {
 	TransferWrite(ctx context.Context, in *PutMessage, opts ...grpc.CallOption) (*Ack, error)
-	ReplicateWrite(ctx context.Context, in *PutMessage, opts ...grpc.CallOption) (*Ack, error)
+	GetReadResponse(ctx context.Context, in *GetMessage, opts ...grpc.CallOption) (*ReadAck, error)
 	TransferHandoffWrite(ctx context.Context, in *HandOffData, opts ...grpc.CallOption) (*Ack, error)
 }
 
@@ -157,10 +157,10 @@ func (c *replicationServiceClient) TransferWrite(ctx context.Context, in *PutMes
 	return out, nil
 }
 
-func (c *replicationServiceClient) ReplicateWrite(ctx context.Context, in *PutMessage, opts ...grpc.CallOption) (*Ack, error) {
+func (c *replicationServiceClient) GetReadResponse(ctx context.Context, in *GetMessage, opts ...grpc.CallOption) (*ReadAck, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Ack)
-	err := c.cc.Invoke(ctx, ReplicationService_ReplicateWrite_FullMethodName, in, out, cOpts...)
+	out := new(ReadAck)
+	err := c.cc.Invoke(ctx, ReplicationService_GetReadResponse_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +182,7 @@ func (c *replicationServiceClient) TransferHandoffWrite(ctx context.Context, in 
 // for forward compatibility.
 type ReplicationServiceServer interface {
 	TransferWrite(context.Context, *PutMessage) (*Ack, error)
-	ReplicateWrite(context.Context, *PutMessage) (*Ack, error)
+	GetReadResponse(context.Context, *GetMessage) (*ReadAck, error)
 	TransferHandoffWrite(context.Context, *HandOffData) (*Ack, error)
 	mustEmbedUnimplementedReplicationServiceServer()
 }
@@ -197,8 +197,8 @@ type UnimplementedReplicationServiceServer struct{}
 func (UnimplementedReplicationServiceServer) TransferWrite(context.Context, *PutMessage) (*Ack, error) {
 	return nil, status.Error(codes.Unimplemented, "method TransferWrite not implemented")
 }
-func (UnimplementedReplicationServiceServer) ReplicateWrite(context.Context, *PutMessage) (*Ack, error) {
-	return nil, status.Error(codes.Unimplemented, "method ReplicateWrite not implemented")
+func (UnimplementedReplicationServiceServer) GetReadResponse(context.Context, *GetMessage) (*ReadAck, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetReadResponse not implemented")
 }
 func (UnimplementedReplicationServiceServer) TransferHandoffWrite(context.Context, *HandOffData) (*Ack, error) {
 	return nil, status.Error(codes.Unimplemented, "method TransferHandoffWrite not implemented")
@@ -242,20 +242,20 @@ func _ReplicationService_TransferWrite_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ReplicationService_ReplicateWrite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PutMessage)
+func _ReplicationService_GetReadResponse_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMessage)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ReplicationServiceServer).ReplicateWrite(ctx, in)
+		return srv.(ReplicationServiceServer).GetReadResponse(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ReplicationService_ReplicateWrite_FullMethodName,
+		FullMethod: ReplicationService_GetReadResponse_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReplicationServiceServer).ReplicateWrite(ctx, req.(*PutMessage))
+		return srv.(ReplicationServiceServer).GetReadResponse(ctx, req.(*GetMessage))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -290,8 +290,8 @@ var ReplicationService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ReplicationService_TransferWrite_Handler,
 		},
 		{
-			MethodName: "ReplicateWrite",
-			Handler:    _ReplicationService_ReplicateWrite_Handler,
+			MethodName: "GetReadResponse",
+			Handler:    _ReplicationService_GetReadResponse_Handler,
 		},
 		{
 			MethodName: "TransferHandoffWrite",
