@@ -22,11 +22,12 @@ const (
 )
 
 type Node struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ServerId      uint32                 `protobuf:"varint,1,opt,name=server_id,json=serverId,proto3" json:"server_id,omitempty"`
-	ServerHashes  []uint64               `protobuf:"varint,2,rep,packed,name=server_hashes,json=serverHashes,proto3" json:"server_hashes,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ServerId       uint32                 `protobuf:"varint,1,opt,name=server_id,json=serverId,proto3" json:"server_id,omitempty"`
+	ServerHashes   []uint64               `protobuf:"varint,2,rep,packed,name=server_hashes,json=serverHashes,proto3" json:"server_hashes,omitempty"`
+	ServerGrpcPort int64                  `protobuf:"varint,3,opt,name=server_grpc_port,json=serverGrpcPort,proto3" json:"server_grpc_port,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *Node) Reset() {
@@ -73,6 +74,13 @@ func (x *Node) GetServerHashes() []uint64 {
 	return nil
 }
 
+func (x *Node) GetServerGrpcPort() int64 {
+	if x != nil {
+		return x.ServerGrpcPort
+	}
+	return 0
+}
+
 type NodeList struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Nodes         []*Node                `protobuf:"bytes,1,rep,name=nodes,proto3" json:"nodes,omitempty"`
@@ -117,6 +125,42 @@ func (x *NodeList) GetNodes() []*Node {
 	return nil
 }
 
+type Empty struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Empty) Reset() {
+	*x = Empty{}
+	mi := &file_pkg_proto_kv_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Empty) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Empty) ProtoMessage() {}
+
+func (x *Empty) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_kv_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Empty.ProtoReflect.Descriptor instead.
+func (*Empty) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{2}
+}
+
 type Ack struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
@@ -128,7 +172,7 @@ type Ack struct {
 
 func (x *Ack) Reset() {
 	*x = Ack{}
-	mi := &file_pkg_proto_kv_proto_msgTypes[2]
+	mi := &file_pkg_proto_kv_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -140,7 +184,7 @@ func (x *Ack) String() string {
 func (*Ack) ProtoMessage() {}
 
 func (x *Ack) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_kv_proto_msgTypes[2]
+	mi := &file_pkg_proto_kv_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -153,7 +197,7 @@ func (x *Ack) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Ack.ProtoReflect.Descriptor instead.
 func (*Ack) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{2}
+	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Ack) GetSuccess() bool {
@@ -179,7 +223,7 @@ func (x *Ack) GetServerId() int64 {
 
 type HandOffData struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ServerId      int64                  `protobuf:"varint,1,opt,name=server_id,json=serverId,proto3" json:"server_id,omitempty"`
+	ServerId      int64                  `protobuf:"varint,1,opt,name=server_id,json=serverId,proto3" json:"server_id,omitempty"` // intended owner of this write
 	Kv            *PutMessage            `protobuf:"bytes,2,opt,name=kv,proto3" json:"kv,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -187,7 +231,7 @@ type HandOffData struct {
 
 func (x *HandOffData) Reset() {
 	*x = HandOffData{}
-	mi := &file_pkg_proto_kv_proto_msgTypes[3]
+	mi := &file_pkg_proto_kv_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -199,7 +243,7 @@ func (x *HandOffData) String() string {
 func (*HandOffData) ProtoMessage() {}
 
 func (x *HandOffData) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_kv_proto_msgTypes[3]
+	mi := &file_pkg_proto_kv_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -212,7 +256,7 @@ func (x *HandOffData) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HandOffData.ProtoReflect.Descriptor instead.
 func (*HandOffData) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{3}
+	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *HandOffData) GetServerId() int64 {
@@ -229,17 +273,20 @@ func (x *HandOffData) GetKv() *PutMessage {
 	return nil
 }
 
+// PutMessage carries a key, a value, and the vector clock describing the
+// version. The coordinator increments its own entry before sending.
 type PutMessage struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Key           int64                  `protobuf:"varint,1,opt,name=key,proto3" json:"key,omitempty"`
 	Value         int64                  `protobuf:"varint,2,opt,name=value,proto3" json:"value,omitempty"`
+	VectorClock   map[int64]int64        `protobuf:"bytes,3,rep,name=vector_clock,json=vectorClock,proto3" json:"vector_clock,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *PutMessage) Reset() {
 	*x = PutMessage{}
-	mi := &file_pkg_proto_kv_proto_msgTypes[4]
+	mi := &file_pkg_proto_kv_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -251,7 +298,7 @@ func (x *PutMessage) String() string {
 func (*PutMessage) ProtoMessage() {}
 
 func (x *PutMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_kv_proto_msgTypes[4]
+	mi := &file_pkg_proto_kv_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -264,7 +311,7 @@ func (x *PutMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PutMessage.ProtoReflect.Descriptor instead.
 func (*PutMessage) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{4}
+	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *PutMessage) GetKey() int64 {
@@ -281,6 +328,13 @@ func (x *PutMessage) GetValue() int64 {
 	return 0
 }
 
+func (x *PutMessage) GetVectorClock() map[int64]int64 {
+	if x != nil {
+		return x.VectorClock
+	}
+	return nil
+}
+
 type GetMessage struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Key           int64                  `protobuf:"varint,1,opt,name=key,proto3" json:"key,omitempty"`
@@ -290,7 +344,7 @@ type GetMessage struct {
 
 func (x *GetMessage) Reset() {
 	*x = GetMessage{}
-	mi := &file_pkg_proto_kv_proto_msgTypes[5]
+	mi := &file_pkg_proto_kv_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -302,7 +356,7 @@ func (x *GetMessage) String() string {
 func (*GetMessage) ProtoMessage() {}
 
 func (x *GetMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_kv_proto_msgTypes[5]
+	mi := &file_pkg_proto_kv_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -315,7 +369,7 @@ func (x *GetMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMessage.ProtoReflect.Descriptor instead.
 func (*GetMessage) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{5}
+	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *GetMessage) GetKey() int64 {
@@ -325,16 +379,78 @@ func (x *GetMessage) GetKey() int64 {
 	return 0
 }
 
+// A single version of a value together with its vector clock. A read can return
+// several of these when concurrent siblings exist.
+type VersionedValue struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Key           int64                  `protobuf:"varint,1,opt,name=key,proto3" json:"key,omitempty"`
+	Value         int64                  `protobuf:"varint,2,opt,name=value,proto3" json:"value,omitempty"`
+	VectorClock   map[int64]int64        `protobuf:"bytes,3,rep,name=vector_clock,json=vectorClock,proto3" json:"vector_clock,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VersionedValue) Reset() {
+	*x = VersionedValue{}
+	mi := &file_pkg_proto_kv_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VersionedValue) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VersionedValue) ProtoMessage() {}
+
+func (x *VersionedValue) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_kv_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VersionedValue.ProtoReflect.Descriptor instead.
+func (*VersionedValue) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *VersionedValue) GetKey() int64 {
+	if x != nil {
+		return x.Key
+	}
+	return 0
+}
+
+func (x *VersionedValue) GetValue() int64 {
+	if x != nil {
+		return x.Value
+	}
+	return 0
+}
+
+func (x *VersionedValue) GetVectorClock() map[int64]int64 {
+	if x != nil {
+		return x.VectorClock
+	}
+	return nil
+}
+
 type ReadAck struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Value         int64                  `protobuf:"varint,1,opt,name=value,proto3" json:"value,omitempty"`
+	Values        []*VersionedValue      `protobuf:"bytes,1,rep,name=values,proto3" json:"values,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ReadAck) Reset() {
 	*x = ReadAck{}
-	mi := &file_pkg_proto_kv_proto_msgTypes[6]
+	mi := &file_pkg_proto_kv_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -346,7 +462,7 @@ func (x *ReadAck) String() string {
 func (*ReadAck) ProtoMessage() {}
 
 func (x *ReadAck) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_kv_proto_msgTypes[6]
+	mi := &file_pkg_proto_kv_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -359,14 +475,102 @@ func (x *ReadAck) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReadAck.ProtoReflect.Descriptor instead.
 func (*ReadAck) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{6}
+	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *ReadAck) GetValue() int64 {
+func (x *ReadAck) GetValues() []*VersionedValue {
 	if x != nil {
-		return x.Value
+		return x.Values
+	}
+	return nil
+}
+
+type MerkleRoot struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Root          uint64                 `protobuf:"varint,1,opt,name=root,proto3" json:"root,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MerkleRoot) Reset() {
+	*x = MerkleRoot{}
+	mi := &file_pkg_proto_kv_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MerkleRoot) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MerkleRoot) ProtoMessage() {}
+
+func (x *MerkleRoot) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_kv_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MerkleRoot.ProtoReflect.Descriptor instead.
+func (*MerkleRoot) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *MerkleRoot) GetRoot() uint64 {
+	if x != nil {
+		return x.Root
 	}
 	return 0
+}
+
+type VersionList struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Values        []*VersionedValue      `protobuf:"bytes,1,rep,name=values,proto3" json:"values,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VersionList) Reset() {
+	*x = VersionList{}
+	mi := &file_pkg_proto_kv_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VersionList) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VersionList) ProtoMessage() {}
+
+func (x *VersionList) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_kv_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VersionList.ProtoReflect.Descriptor instead.
+func (*VersionList) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *VersionList) GetValues() []*VersionedValue {
+	if x != nil {
+		return x.Values
+	}
+	return nil
 }
 
 type GossipMessage struct {
@@ -378,7 +582,7 @@ type GossipMessage struct {
 
 func (x *GossipMessage) Reset() {
 	*x = GossipMessage{}
-	mi := &file_pkg_proto_kv_proto_msgTypes[7]
+	mi := &file_pkg_proto_kv_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -390,7 +594,7 @@ func (x *GossipMessage) String() string {
 func (*GossipMessage) ProtoMessage() {}
 
 func (x *GossipMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_kv_proto_msgTypes[7]
+	mi := &file_pkg_proto_kv_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -403,7 +607,7 @@ func (x *GossipMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GossipMessage.ProtoReflect.Descriptor instead.
 func (*GossipMessage) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{7}
+	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *GossipMessage) GetServerState() map[int64]*ServerStateMessage {
@@ -414,17 +618,18 @@ func (x *GossipMessage) GetServerState() map[int64]*ServerStateMessage {
 }
 
 type ServerStateMessage struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ServerId      int64                  `protobuf:"varint,1,opt,name=server_id,json=serverId,proto3" json:"server_id,omitempty"`
-	Heartbeat     *HeartBeatMessage      `protobuf:"bytes,2,opt,name=heartbeat,proto3" json:"heartbeat,omitempty"`
-	ServerState   int64                  `protobuf:"varint,3,opt,name=server_state,json=serverState,proto3" json:"server_state,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ServerId       int64                  `protobuf:"varint,1,opt,name=server_id,json=serverId,proto3" json:"server_id,omitempty"`
+	Heartbeat      *HeartBeatMessage      `protobuf:"bytes,2,opt,name=heartbeat,proto3" json:"heartbeat,omitempty"`
+	ServerState    int64                  `protobuf:"varint,3,opt,name=server_state,json=serverState,proto3" json:"server_state,omitempty"`
+	ServerGrpcPort int64                  `protobuf:"varint,4,opt,name=server_grpc_port,json=serverGrpcPort,proto3" json:"server_grpc_port,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *ServerStateMessage) Reset() {
 	*x = ServerStateMessage{}
-	mi := &file_pkg_proto_kv_proto_msgTypes[8]
+	mi := &file_pkg_proto_kv_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -436,7 +641,7 @@ func (x *ServerStateMessage) String() string {
 func (*ServerStateMessage) ProtoMessage() {}
 
 func (x *ServerStateMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_kv_proto_msgTypes[8]
+	mi := &file_pkg_proto_kv_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -449,7 +654,7 @@ func (x *ServerStateMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServerStateMessage.ProtoReflect.Descriptor instead.
 func (*ServerStateMessage) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{8}
+	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *ServerStateMessage) GetServerId() int64 {
@@ -473,17 +678,24 @@ func (x *ServerStateMessage) GetServerState() int64 {
 	return 0
 }
 
+func (x *ServerStateMessage) GetServerGrpcPort() int64 {
+	if x != nil {
+		return x.ServerGrpcPort
+	}
+	return 0
+}
+
 type HeartBeatMessage struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	HeartbeatNumber int64                  `protobuf:"varint,1,opt,name=heartbeat_number,json=heartbeatNumber,proto3" json:"heartbeat_number,omitempty"`
-	Timestamp       string                 `protobuf:"bytes,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"` // actual go stores the time in time.Time
+	Timestamp       string                 `protobuf:"bytes,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"` // RFC3339 formatted time.Time
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
 
 func (x *HeartBeatMessage) Reset() {
 	*x = HeartBeatMessage{}
-	mi := &file_pkg_proto_kv_proto_msgTypes[9]
+	mi := &file_pkg_proto_kv_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -495,7 +707,7 @@ func (x *HeartBeatMessage) String() string {
 func (*HeartBeatMessage) ProtoMessage() {}
 
 func (x *HeartBeatMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_proto_kv_proto_msgTypes[9]
+	mi := &file_pkg_proto_kv_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -508,7 +720,7 @@ func (x *HeartBeatMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HeartBeatMessage.ProtoReflect.Descriptor instead.
 func (*HeartBeatMessage) Descriptor() ([]byte, []int) {
-	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{9}
+	return file_pkg_proto_kv_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *HeartBeatMessage) GetHeartbeatNumber() int64 {
@@ -529,46 +741,67 @@ var File_pkg_proto_kv_proto protoreflect.FileDescriptor
 
 const file_pkg_proto_kv_proto_rawDesc = "" +
 	"\n" +
-	"\x12pkg/proto/kv.proto\x12\x06dynamo\"H\n" +
+	"\x12pkg/proto/kv.proto\x12\x06dynamo\"r\n" +
 	"\x04Node\x12\x1b\n" +
 	"\tserver_id\x18\x01 \x01(\rR\bserverId\x12#\n" +
-	"\rserver_hashes\x18\x02 \x03(\x04R\fserverHashes\".\n" +
+	"\rserver_hashes\x18\x02 \x03(\x04R\fserverHashes\x12(\n" +
+	"\x10server_grpc_port\x18\x03 \x01(\x03R\x0eserverGrpcPort\".\n" +
 	"\bNodeList\x12\"\n" +
-	"\x05nodes\x18\x01 \x03(\v2\f.dynamo.NodeR\x05nodes\"V\n" +
+	"\x05nodes\x18\x01 \x03(\v2\f.dynamo.NodeR\x05nodes\"\a\n" +
+	"\x05Empty\"V\n" +
 	"\x03Ack\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x1b\n" +
 	"\tserver_id\x18\x03 \x01(\x03R\bserverId\"N\n" +
 	"\vHandOffData\x12\x1b\n" +
 	"\tserver_id\x18\x01 \x01(\x03R\bserverId\x12\"\n" +
-	"\x02kv\x18\x02 \x01(\v2\x12.dynamo.PutMessageR\x02kv\"4\n" +
+	"\x02kv\x18\x02 \x01(\v2\x12.dynamo.PutMessageR\x02kv\"\xbc\x01\n" +
 	"\n" +
 	"PutMessage\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\x03R\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\x03R\x05value\"\x1e\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value\x12F\n" +
+	"\fvector_clock\x18\x03 \x03(\v2#.dynamo.PutMessage.VectorClockEntryR\vvectorClock\x1a>\n" +
+	"\x10VectorClockEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\x03R\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\"\x1e\n" +
 	"\n" +
 	"GetMessage\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\x03R\x03key\"\x1f\n" +
-	"\aReadAck\x12\x14\n" +
-	"\x05value\x18\x01 \x01(\x03R\x05value\"\xb6\x01\n" +
+	"\x03key\x18\x01 \x01(\x03R\x03key\"\xc4\x01\n" +
+	"\x0eVersionedValue\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\x03R\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value\x12J\n" +
+	"\fvector_clock\x18\x03 \x03(\v2'.dynamo.VersionedValue.VectorClockEntryR\vvectorClock\x1a>\n" +
+	"\x10VectorClockEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\x03R\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\"9\n" +
+	"\aReadAck\x12.\n" +
+	"\x06values\x18\x01 \x03(\v2\x16.dynamo.VersionedValueR\x06values\" \n" +
+	"\n" +
+	"MerkleRoot\x12\x12\n" +
+	"\x04root\x18\x01 \x01(\x04R\x04root\"=\n" +
+	"\vVersionList\x12.\n" +
+	"\x06values\x18\x01 \x03(\v2\x16.dynamo.VersionedValueR\x06values\"\xb6\x01\n" +
 	"\rGossipMessage\x12I\n" +
 	"\fserver_state\x18\x01 \x03(\v2&.dynamo.GossipMessage.ServerStateEntryR\vserverState\x1aZ\n" +
 	"\x10ServerStateEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\x03R\x03key\x120\n" +
-	"\x05value\x18\x02 \x01(\v2\x1a.dynamo.ServerStateMessageR\x05value:\x028\x01\"\x8c\x01\n" +
+	"\x05value\x18\x02 \x01(\v2\x1a.dynamo.ServerStateMessageR\x05value:\x028\x01\"\xb6\x01\n" +
 	"\x12ServerStateMessage\x12\x1b\n" +
 	"\tserver_id\x18\x01 \x01(\x03R\bserverId\x126\n" +
 	"\theartbeat\x18\x02 \x01(\v2\x18.dynamo.HeartBeatMessageR\theartbeat\x12!\n" +
-	"\fserver_state\x18\x03 \x01(\x03R\vserverState\"[\n" +
+	"\fserver_state\x18\x03 \x01(\x03R\vserverState\x12(\n" +
+	"\x10server_grpc_port\x18\x04 \x01(\x03R\x0eserverGrpcPort\"[\n" +
 	"\x10HeartBeatMessage\x12)\n" +
 	"\x10heartbeat_number\x18\x01 \x01(\x03R\x0fheartbeatNumber\x12\x1c\n" +
 	"\ttimestamp\x18\x02 \x01(\tR\ttimestamp2F\n" +
 	"\x14NodeDiscoveryService\x12.\n" +
-	"\fRegisterNode\x12\f.dynamo.Node\x1a\x10.dynamo.NodeList2\xb8\x01\n" +
+	"\fRegisterNode\x12\f.dynamo.Node\x1a\x10.dynamo.NodeList2\xa2\x02\n" +
 	"\x12ReplicationService\x120\n" +
 	"\rTransferWrite\x12\x12.dynamo.PutMessage\x1a\v.dynamo.Ack\x126\n" +
 	"\x0fGetReadResponse\x12\x12.dynamo.GetMessage\x1a\x0f.dynamo.ReadAck\x128\n" +
-	"\x14TransferHandoffWrite\x12\x13.dynamo.HandOffData\x1a\v.dynamo.Ack2=\n" +
+	"\x14TransferHandoffWrite\x12\x13.dynamo.HandOffData\x1a\v.dynamo.Ack\x122\n" +
+	"\rGetMerkleRoot\x12\r.dynamo.Empty\x1a\x12.dynamo.MerkleRoot\x124\n" +
+	"\x0eGetAllVersions\x12\r.dynamo.Empty\x1a\x13.dynamo.VersionList2=\n" +
 	"\rGossipService\x12,\n" +
 	"\x06Gossip\x12\x15.dynamo.GossipMessage\x1a\v.dynamo.AckB\tZ\apkg/genb\x06proto3"
 
@@ -584,41 +817,55 @@ func file_pkg_proto_kv_proto_rawDescGZIP() []byte {
 	return file_pkg_proto_kv_proto_rawDescData
 }
 
-var file_pkg_proto_kv_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_pkg_proto_kv_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_pkg_proto_kv_proto_goTypes = []any{
 	(*Node)(nil),               // 0: dynamo.Node
 	(*NodeList)(nil),           // 1: dynamo.NodeList
-	(*Ack)(nil),                // 2: dynamo.Ack
-	(*HandOffData)(nil),        // 3: dynamo.HandOffData
-	(*PutMessage)(nil),         // 4: dynamo.PutMessage
-	(*GetMessage)(nil),         // 5: dynamo.GetMessage
-	(*ReadAck)(nil),            // 6: dynamo.ReadAck
-	(*GossipMessage)(nil),      // 7: dynamo.GossipMessage
-	(*ServerStateMessage)(nil), // 8: dynamo.ServerStateMessage
-	(*HeartBeatMessage)(nil),   // 9: dynamo.HeartBeatMessage
-	nil,                        // 10: dynamo.GossipMessage.ServerStateEntry
+	(*Empty)(nil),              // 2: dynamo.Empty
+	(*Ack)(nil),                // 3: dynamo.Ack
+	(*HandOffData)(nil),        // 4: dynamo.HandOffData
+	(*PutMessage)(nil),         // 5: dynamo.PutMessage
+	(*GetMessage)(nil),         // 6: dynamo.GetMessage
+	(*VersionedValue)(nil),     // 7: dynamo.VersionedValue
+	(*ReadAck)(nil),            // 8: dynamo.ReadAck
+	(*MerkleRoot)(nil),         // 9: dynamo.MerkleRoot
+	(*VersionList)(nil),        // 10: dynamo.VersionList
+	(*GossipMessage)(nil),      // 11: dynamo.GossipMessage
+	(*ServerStateMessage)(nil), // 12: dynamo.ServerStateMessage
+	(*HeartBeatMessage)(nil),   // 13: dynamo.HeartBeatMessage
+	nil,                        // 14: dynamo.PutMessage.VectorClockEntry
+	nil,                        // 15: dynamo.VersionedValue.VectorClockEntry
+	nil,                        // 16: dynamo.GossipMessage.ServerStateEntry
 }
 var file_pkg_proto_kv_proto_depIdxs = []int32{
 	0,  // 0: dynamo.NodeList.nodes:type_name -> dynamo.Node
-	4,  // 1: dynamo.HandOffData.kv:type_name -> dynamo.PutMessage
-	10, // 2: dynamo.GossipMessage.server_state:type_name -> dynamo.GossipMessage.ServerStateEntry
-	9,  // 3: dynamo.ServerStateMessage.heartbeat:type_name -> dynamo.HeartBeatMessage
-	8,  // 4: dynamo.GossipMessage.ServerStateEntry.value:type_name -> dynamo.ServerStateMessage
-	0,  // 5: dynamo.NodeDiscoveryService.RegisterNode:input_type -> dynamo.Node
-	4,  // 6: dynamo.ReplicationService.TransferWrite:input_type -> dynamo.PutMessage
-	5,  // 7: dynamo.ReplicationService.GetReadResponse:input_type -> dynamo.GetMessage
-	3,  // 8: dynamo.ReplicationService.TransferHandoffWrite:input_type -> dynamo.HandOffData
-	7,  // 9: dynamo.GossipService.Gossip:input_type -> dynamo.GossipMessage
-	1,  // 10: dynamo.NodeDiscoveryService.RegisterNode:output_type -> dynamo.NodeList
-	2,  // 11: dynamo.ReplicationService.TransferWrite:output_type -> dynamo.Ack
-	6,  // 12: dynamo.ReplicationService.GetReadResponse:output_type -> dynamo.ReadAck
-	2,  // 13: dynamo.ReplicationService.TransferHandoffWrite:output_type -> dynamo.Ack
-	2,  // 14: dynamo.GossipService.Gossip:output_type -> dynamo.Ack
-	10, // [10:15] is the sub-list for method output_type
-	5,  // [5:10] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	5,  // 1: dynamo.HandOffData.kv:type_name -> dynamo.PutMessage
+	14, // 2: dynamo.PutMessage.vector_clock:type_name -> dynamo.PutMessage.VectorClockEntry
+	15, // 3: dynamo.VersionedValue.vector_clock:type_name -> dynamo.VersionedValue.VectorClockEntry
+	7,  // 4: dynamo.ReadAck.values:type_name -> dynamo.VersionedValue
+	7,  // 5: dynamo.VersionList.values:type_name -> dynamo.VersionedValue
+	16, // 6: dynamo.GossipMessage.server_state:type_name -> dynamo.GossipMessage.ServerStateEntry
+	13, // 7: dynamo.ServerStateMessage.heartbeat:type_name -> dynamo.HeartBeatMessage
+	12, // 8: dynamo.GossipMessage.ServerStateEntry.value:type_name -> dynamo.ServerStateMessage
+	0,  // 9: dynamo.NodeDiscoveryService.RegisterNode:input_type -> dynamo.Node
+	5,  // 10: dynamo.ReplicationService.TransferWrite:input_type -> dynamo.PutMessage
+	6,  // 11: dynamo.ReplicationService.GetReadResponse:input_type -> dynamo.GetMessage
+	4,  // 12: dynamo.ReplicationService.TransferHandoffWrite:input_type -> dynamo.HandOffData
+	2,  // 13: dynamo.ReplicationService.GetMerkleRoot:input_type -> dynamo.Empty
+	2,  // 14: dynamo.ReplicationService.GetAllVersions:input_type -> dynamo.Empty
+	11, // 15: dynamo.GossipService.Gossip:input_type -> dynamo.GossipMessage
+	1,  // 16: dynamo.NodeDiscoveryService.RegisterNode:output_type -> dynamo.NodeList
+	3,  // 17: dynamo.ReplicationService.TransferWrite:output_type -> dynamo.Ack
+	8,  // 18: dynamo.ReplicationService.GetReadResponse:output_type -> dynamo.ReadAck
+	3,  // 19: dynamo.ReplicationService.TransferHandoffWrite:output_type -> dynamo.Ack
+	9,  // 20: dynamo.ReplicationService.GetMerkleRoot:output_type -> dynamo.MerkleRoot
+	10, // 21: dynamo.ReplicationService.GetAllVersions:output_type -> dynamo.VersionList
+	3,  // 22: dynamo.GossipService.Gossip:output_type -> dynamo.Ack
+	16, // [16:23] is the sub-list for method output_type
+	9,  // [9:16] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_pkg_proto_kv_proto_init() }
@@ -632,7 +879,7 @@ func file_pkg_proto_kv_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_proto_kv_proto_rawDesc), len(file_pkg_proto_kv_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   3,
 		},

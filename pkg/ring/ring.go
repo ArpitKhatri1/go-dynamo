@@ -50,19 +50,36 @@ func (r *ConsistentHashingRing) GetMembers() map[uint64]int {
 	return r.members
 }
 
-// Get top N in preference list which are all from different servers.
+// GetPreferenceListForKey returns the ordered list of DISTINCT servers
+// responsible for a key. We start at the key's position on the ring and walk
+// clockwise, collecting each new server we meet (skipping virtual nodes that
+// map to a server we already have) until we have N + a couple of extra nodes.
+//
+// The first N are the "preferred" replicas; the extras are stand-ins used for
+// sloppy quorum / hinted handoff when a preferred node is down.
 func (r *ConsistentHashingRing) GetPreferenceListForKey(partitionKey uint64) []int {
 	extraNodes := 2
 	globalConfig := config.GetSystemConfig()
-	preferenceList := []int{r.GetNextServerId(partitionKey)}
-	replicationFactor := globalConfig.ReplicationFactorN
-	count := 1
-	for (len(preferenceList)) < replicationFactor+extraNodes {
-		nextserverId := r.GetNextServerId(uint64(preferenceList[count-1]))
-		if nextserverId != preferenceList[0] {
-			preferenceList = append(preferenceList, nextserverId)
-		} else {
-			break
+	needed := globalConfig.ReplicationFactorN + extraNodes
+
+	if len(r.hashIds) == 0 {
+		return nil
+	}
+
+	// index of the first virtual node clockwise from the key's position
+	startIdx := sort.Search(len(r.hashIds), func(i int) bool {
+		return r.hashIds[i] > partitionKey
+	})
+
+	preferenceList := []int{}
+	seen := map[int]bool{}
+
+	for i := 0; i < len(r.hashIds) && len(preferenceList) < needed; i++ {
+		pos := (startIdx + i) % len(r.hashIds)
+		serverId := r.members[r.hashIds[pos]]
+		if !seen[serverId] {
+			seen[serverId] = true
+			preferenceList = append(preferenceList, serverId)
 		}
 	}
 

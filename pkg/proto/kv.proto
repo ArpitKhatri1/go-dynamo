@@ -12,8 +12,9 @@ service NodeDiscoveryService { // calling to seeder node
 }
 
 message Node {
-  uint32          server_id     = 1;
-  repeated uint64 server_hashes = 2;
+  uint32          server_id      = 1;
+  repeated uint64 server_hashes  = 2;
+  int64           server_grpc_port = 3;
 }
 
 message NodeList {
@@ -23,34 +24,62 @@ message NodeList {
 
 // --------------------REPLICATION-----------------------
 
-service ReplicationService { // 
+service ReplicationService {
+  // TransferWrite is the replica store path: the coordinator sends the already
+  // versioned value and the replica stores it verbatim.
   rpc TransferWrite(PutMessage) returns (Ack);
   rpc GetReadResponse(GetMessage) returns (ReadAck);
+  // TransferHandoffWrite stores a hint for a node that is currently down.
   rpc TransferHandoffWrite(HandOffData) returns (Ack);
+
+  // Anti-entropy (Merkle tree) RPCs.
+  rpc GetMerkleRoot(Empty) returns (MerkleRoot);
+  rpc GetAllVersions(Empty) returns (VersionList);
 }
 
-message Ack{
+message Empty {}
+
+message Ack {
   bool   success   = 1;
   string message   = 2; // optional message string
   int64  server_id = 3; // serverId sending the ACK
 }
 
 message HandOffData {
-  int64      server_id = 1;
+  int64      server_id = 1; // intended owner of this write
   PutMessage kv        = 2;
 }
 
+// PutMessage carries a key, a value, and the vector clock describing the
+// version. The coordinator increments its own entry before sending.
 message PutMessage {
-  int64 key   = 1;
-  int64 value = 2;
+  int64            key          = 1;
+  int64            value        = 2;
+  map<int64,int64> vector_clock = 3;
 }
 
 message GetMessage {
   int64 key = 1;
 }
 
+// A single version of a value together with its vector clock. A read can return
+// several of these when concurrent siblings exist.
+message VersionedValue {
+  int64            key          = 1;
+  int64            value        = 2;
+  map<int64,int64> vector_clock = 3;
+}
+
 message ReadAck {
-  int64 value = 1;
+  repeated VersionedValue values = 1;
+}
+
+message MerkleRoot {
+  uint64 root = 1;
+}
+
+message VersionList {
+  repeated VersionedValue values = 1;
 }
 
 // -------------------------GOSSIP---------------------------
@@ -59,31 +88,18 @@ service GossipService {
   rpc Gossip(GossipMessage) returns (Ack);
 }
 
-message GossipMessage{
+message GossipMessage {
   map<int64,ServerStateMessage> server_state = 1;
 }
 
 message ServerStateMessage {
-  int64 server_id = 1;
-  HeartBeatMessage heartbeat = 2;
-  int64 server_state = 3;
+  int64            server_id        = 1;
+  HeartBeatMessage heartbeat        = 2;
+  int64            server_state     = 3;
+  int64            server_grpc_port = 4;
 }
 
-
-message HeartBeatMessage{
-  int64 heartbeat_number = 1;
-  string timestamp = 2; // actual go stores the time in time.Time
-
+message HeartBeatMessage {
+  int64  heartbeat_number = 1;
+  string timestamp        = 2; // RFC3339 formatted time.Time
 }
-
-
-
-
-
-
-
-
-
-
-
-

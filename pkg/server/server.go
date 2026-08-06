@@ -11,6 +11,7 @@ import (
 	"net"
 	"strconv"
 	"sync"
+	"time"
 
 	"google.golang.org/grpc"
 )
@@ -75,6 +76,15 @@ func NewServer(config *ServerConfig) *Server {
 	// generate server hash and its virtual nodes hash
 	var chRing *ConsistentHashingRing
 
+	// Every node starts with a membership table that knows about itself.
+	membership := NewMembership()
+	membership.Upsert(ServerState{
+		ServerId:        config.Id,
+		ServerGRPCPort:  config.grpcPort,
+		ServerState:     Alive,
+		ServerHeartbeat: Heartbeat{Hnumber: 0, HTimeStamp: time.Now()},
+	})
+
 	if config.seedNode == true {
 		// generate its own ring
 		// fill by gossip later
@@ -91,8 +101,9 @@ func NewServer(config *ServerConfig) *Server {
 		// fetch the ring from seed node (act as grpc client)
 
 		node := &pb.Node{
-			ServerId:     uint32(config.Id),
-			ServerHashes: config.hashKeys,
+			ServerId:       uint32(config.Id),
+			ServerHashes:   config.hashKeys,
+			ServerGrpcPort: int64(config.grpcPort),
 		}
 
 		client := NewNodeRegistrationClient(config)
@@ -115,14 +126,25 @@ func NewServer(config *ServerConfig) *Server {
 				mpp[hash] = int(currNode.ServerId)
 				hashIds = append(hashIds, hash)
 			}
+			// learn each peer's gRPC port so we can talk to it directly
+			if int(currNode.ServerId) != config.Id {
+				membership.Upsert(ServerState{
+					ServerId:        int(currNode.ServerId),
+					ServerGRPCPort:  int(currNode.GetServerGrpcPort()),
+					ServerState:     Alive,
+					ServerHeartbeat: Heartbeat{Hnumber: 0, HTimeStamp: time.Now()},
+				})
+			}
 		}
 
 		chRing = ring.NewConsistentHashRing(mpp, hashIds)
 	}
 
 	return &Server{
-		serverConfig:    config,
-		currentHashRing: chRing,
+		serverConfig:     config,
+		currentHashRing:  chRing,
+		serverMembership: membership,
+		serverStorage:    storage.CreateNewEmptyStorage(),
 	}
 }
 
@@ -134,6 +156,12 @@ func (s *Server) Run() error {
 			log.Fatal(err)
 		}
 	}()
+
+	// Background convergence loops (the paper's three safety nets):
+	go s.runGossipLoop()      // ~1s: membership + failure detection
+	go s.runHandoffLoop()     // ~5s: replay hints to recovered nodes
+	go s.runAntiEntropyLoop() // ~30s: Merkle-tree replica reconciliation
+
 	return s.RunTCPServer()
 }
 

@@ -128,15 +128,23 @@ const (
 	ReplicationService_TransferWrite_FullMethodName        = "/dynamo.ReplicationService/TransferWrite"
 	ReplicationService_GetReadResponse_FullMethodName      = "/dynamo.ReplicationService/GetReadResponse"
 	ReplicationService_TransferHandoffWrite_FullMethodName = "/dynamo.ReplicationService/TransferHandoffWrite"
+	ReplicationService_GetMerkleRoot_FullMethodName        = "/dynamo.ReplicationService/GetMerkleRoot"
+	ReplicationService_GetAllVersions_FullMethodName       = "/dynamo.ReplicationService/GetAllVersions"
 )
 
 // ReplicationServiceClient is the client API for ReplicationService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ReplicationServiceClient interface {
+	// TransferWrite is the replica store path: the coordinator sends the already
+	// versioned value and the replica stores it verbatim.
 	TransferWrite(ctx context.Context, in *PutMessage, opts ...grpc.CallOption) (*Ack, error)
 	GetReadResponse(ctx context.Context, in *GetMessage, opts ...grpc.CallOption) (*ReadAck, error)
+	// TransferHandoffWrite stores a hint for a node that is currently down.
 	TransferHandoffWrite(ctx context.Context, in *HandOffData, opts ...grpc.CallOption) (*Ack, error)
+	// Anti-entropy (Merkle tree) RPCs.
+	GetMerkleRoot(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*MerkleRoot, error)
+	GetAllVersions(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*VersionList, error)
 }
 
 type replicationServiceClient struct {
@@ -177,13 +185,39 @@ func (c *replicationServiceClient) TransferHandoffWrite(ctx context.Context, in 
 	return out, nil
 }
 
+func (c *replicationServiceClient) GetMerkleRoot(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*MerkleRoot, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MerkleRoot)
+	err := c.cc.Invoke(ctx, ReplicationService_GetMerkleRoot_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *replicationServiceClient) GetAllVersions(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*VersionList, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(VersionList)
+	err := c.cc.Invoke(ctx, ReplicationService_GetAllVersions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ReplicationServiceServer is the server API for ReplicationService service.
 // All implementations must embed UnimplementedReplicationServiceServer
 // for forward compatibility.
 type ReplicationServiceServer interface {
+	// TransferWrite is the replica store path: the coordinator sends the already
+	// versioned value and the replica stores it verbatim.
 	TransferWrite(context.Context, *PutMessage) (*Ack, error)
 	GetReadResponse(context.Context, *GetMessage) (*ReadAck, error)
+	// TransferHandoffWrite stores a hint for a node that is currently down.
 	TransferHandoffWrite(context.Context, *HandOffData) (*Ack, error)
+	// Anti-entropy (Merkle tree) RPCs.
+	GetMerkleRoot(context.Context, *Empty) (*MerkleRoot, error)
+	GetAllVersions(context.Context, *Empty) (*VersionList, error)
 	mustEmbedUnimplementedReplicationServiceServer()
 }
 
@@ -202,6 +236,12 @@ func (UnimplementedReplicationServiceServer) GetReadResponse(context.Context, *G
 }
 func (UnimplementedReplicationServiceServer) TransferHandoffWrite(context.Context, *HandOffData) (*Ack, error) {
 	return nil, status.Error(codes.Unimplemented, "method TransferHandoffWrite not implemented")
+}
+func (UnimplementedReplicationServiceServer) GetMerkleRoot(context.Context, *Empty) (*MerkleRoot, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMerkleRoot not implemented")
+}
+func (UnimplementedReplicationServiceServer) GetAllVersions(context.Context, *Empty) (*VersionList, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetAllVersions not implemented")
 }
 func (UnimplementedReplicationServiceServer) mustEmbedUnimplementedReplicationServiceServer() {}
 func (UnimplementedReplicationServiceServer) testEmbeddedByValue()                            {}
@@ -278,6 +318,42 @@ func _ReplicationService_TransferHandoffWrite_Handler(srv interface{}, ctx conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ReplicationService_GetMerkleRoot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReplicationServiceServer).GetMerkleRoot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ReplicationService_GetMerkleRoot_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReplicationServiceServer).GetMerkleRoot(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ReplicationService_GetAllVersions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReplicationServiceServer).GetAllVersions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ReplicationService_GetAllVersions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReplicationServiceServer).GetAllVersions(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ReplicationService_ServiceDesc is the grpc.ServiceDesc for ReplicationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -296,6 +372,14 @@ var ReplicationService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "TransferHandoffWrite",
 			Handler:    _ReplicationService_TransferHandoffWrite_Handler,
+		},
+		{
+			MethodName: "GetMerkleRoot",
+			Handler:    _ReplicationService_GetMerkleRoot_Handler,
+		},
+		{
+			MethodName: "GetAllVersions",
+			Handler:    _ReplicationService_GetAllVersions_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
